@@ -36,15 +36,14 @@ class Machine(object):
             print('Something else went wrong: {}'.format(e))
             sys.exit(1)
 
-    def run(self, cmd, timeout=10):
+    def run(self, cmd, timeout=1800):
         stdin, stdout, stderr = self.client.exec_command(cmd, timeout=timeout)
         stdout = stdout.read().decode('utf-8')
         stderr = stderr.read().decode('utf-8')
-        if stderr:
-            print('Problem occurred while running command: {}. The error is {}.'.format(cmd, stderr))
-            self.client.close()
-            sys.exit(1)
-        return stdout
+        return stdout, stderr
+
+    def disconnect(self):
+        self.client.close()
 
 
 class BlackSwanBaseliner(object):
@@ -64,10 +63,13 @@ class BlackSwanBaseliner(object):
 
     def run(self):
         for machine in self.machines:
+            print ("Running on {}\n".format(machine.hostname))
             machine.connect()
             for cmd in self.commands:
-                out = machine.run(cmd)
+                out, err = machine.run(cmd)
                 print("STDOUT: ", out)
+                print("STDERR: ", err)
+            machine.disconnect()
 
     def load_commands_from_file(self, path):
         if not os.path.exists(path):
@@ -85,7 +87,18 @@ class BlackSwanBaseliner(object):
 
 if __name__ == "__main__":
     baseliner = BlackSwanBaseliner()
+
+    # Add machines
+    baseliner.add_machine('ms1126.utah.cloudlab.us', 22, 'noobjc', os.path.expanduser('~/.ssh/id_rsa_cloudlab'), '12345')
+    baseliner.add_machine('ms1139.utah.cloudlab.us', 22, 'noobjc', os.path.expanduser('~/.ssh/id_rsa_cloudlab'), '12345')
+    baseliner.add_machine('ms1124.utah.cloudlab.us', 22, 'noobjc', os.path.expanduser('~/.ssh/id_rsa_cloudlab'), '12345')
+    baseliner.add_machine('ms1134.utah.cloudlab.us', 22, 'noobjc', os.path.expanduser('~/.ssh/id_rsa_cloudlab'), '12345')
+    baseliner.add_machine('ms1120.utah.cloudlab.us', 22, 'noobjc', os.path.expanduser('~/.ssh/id_rsa_cloudlab'), '12345')
+    baseliner.add_machine('ms1110.utah.cloudlab.us', 22, 'noobjc', os.path.expanduser('~/.ssh/id_rsa_cloudlab'), '12345')
+    baseliner.add_machine('ms1129.utah.cloudlab.us', 22, 'noobjc', os.path.expanduser('~/.ssh/id_rsa_cloudlab'), '12345')
+    baseliner.add_machine('ms1112.utah.cloudlab.us', 22, 'noobjc', os.path.expanduser('~/.ssh/id_rsa_cloudlab'), '12345')
     baseliner.add_machine('ms1137.utah.cloudlab.us', 22, 'noobjc', os.path.expanduser('~/.ssh/id_rsa_cloudlab'), '12345')
+    baseliner.add_machine('ms1103.utah.cloudlab.us', 22, 'noobjc', os.path.expanduser('~/.ssh/id_rsa_cloudlab'), '12345')
+
     baseliner.load_commands_from_file('commands.txt')
-    # baseliner.load_commands(['ls -al'])
     baseliner.run()
