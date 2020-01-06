@@ -1,2 +1,3 @@
+docker pull jcnitdgp25/baseliner-docker
 crontab -r
 (crontab -u noobjc -l ; echo "0 * * * * /usr/bin/docker run --rm --privileged --cap-add=ALL -v /dev:/dev -v /lib/modules:/lib/modules --name baseliner-container -e BLACKSWAN_HOST=scruffy.soe.ucsc.edu -e BLACKSWAN_USER=root -e BLACKSWAN_PASSWD=root -e BLACKSWAN_DB=blackswan jcnitdgp25/baseliner-docker" ; echo "") | crontab -u noobjc -
